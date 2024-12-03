@@ -3,9 +3,15 @@ package com.idus.idus.entity;
 
 import com.idus.idus.role.Role;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -16,15 +22,27 @@ public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Valid
+
+    @Column(nullable = false)
+    @NotBlank(message = "O username é obrigatório e não pode ser vazio.")
+    @Size(min = 3, max = 50, message = "O username deve ter entre 3 e 50 caracteres.")
     private String username;
 
     @Column(nullable = false)
+    @NotBlank(message = "A senha é obrigatória e não pode ser vazia.")
+    @Size(min = 8, message = "A senha deve ter no mínimo 8 caracteres.")
     private String password;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)  // Define que o valor do Enum será salvo como String
+    @NotNull(message = "O papel (role) é obrigatório.")
     private Role role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Point> points = new ArrayList<>();
+
+
 
     public User() {}
 
@@ -36,8 +54,8 @@ public class User implements Serializable {
             // Converte a String para o Enum Role
             this.role = Role.valueOf(role.toUpperCase());
         } catch (IllegalArgumentException e) {
-            // Lida com erro, por exemplo, definindo um valor default ou lançando uma exceção personalizada
-            throw new IllegalArgumentException("Invalid role value: " + role);
+
+            throw new IllegalArgumentException("Valor da Role invalida: " + role);
         }
     }
 
