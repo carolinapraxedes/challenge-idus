@@ -37,4 +37,13 @@ public class UserService {
             throw new UserException("Erro ao buscar o usuário: " + e.getMessage());
         }
     }
+
+    public User getUserByUsername(String username) {
+        try {
+            return userRepository.findByUsername(username).stream().findFirst().orElse(null);
+
+        } catch (Exception e) {
+            throw new UserException("Erro ao buscar o usuário: " + e.getMessage());
+        }
+    }
 }

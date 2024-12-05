@@ -1,27 +1,36 @@
 package com.idus.idus.entity;
 
 
-import com.idus.idus.role.Role;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
 
 @Table(name="tb_users")
-public class User implements Serializable {
+public class User implements UserDetails{
+    @Setter
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
+    @Setter
     @Valid
 
     @Column(nullable = false)
@@ -29,13 +38,18 @@ public class User implements Serializable {
     @Size(min = 3, max = 50, message = "O username deve ter entre 3 e 50 caracteres.")
     private String username;
 
+    @Getter
+    @Setter
     @Column(nullable = false)
     @NotBlank(message = "A senha é obrigatória e não pode ser vazia.")
     @Size(min = 8, message = "A senha deve ter no mínimo 8 caracteres.")
     private String password;
 
+
+    @Getter
+    @Setter
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)  // Define que o valor do Enum será salvo como String
+    @Enumerated(value = EnumType.STRING)  // Define que o valor do Enum será salvo como String
     @NotNull(message = "O papel (role) é obrigatório.")
     private Role role;
 
@@ -46,50 +60,11 @@ public class User implements Serializable {
 
     public User() {}
 
-    public User(Long id, String username, String password, String role) {
+    public User(Long id, String username, String password, Role role) {
         this.id = id;
         this.username = username;
         this.password = password;
-        try {
-            // Converte a String para o Enum Role
-            this.role = Role.valueOf(role.toUpperCase());
-        } catch (IllegalArgumentException e) {
-
-            throw new IllegalArgumentException("Valor da Role invalida: " + role);
-        }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        // Converte a String para o enum Role
-        this.role = Role.valueOf(role.toUpperCase());
+        this.role = role;
     }
 
     @Override
@@ -111,5 +86,30 @@ public class User implements Serializable {
                 ", username='" + username + '\'' +
                 ", id=" + id +
                 '}';
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

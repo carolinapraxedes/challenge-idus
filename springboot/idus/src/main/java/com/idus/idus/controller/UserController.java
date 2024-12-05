@@ -19,17 +19,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/save")
-    // @PreAuthorize("hasRole('USER')
-    public ResponseEntity<?> saveUser(@Valid @RequestBody User user, BindingResult result) {
-        if (result.hasErrors()) {
-            // Lógica para retornar erros de validação
-            return ResponseEntity.badRequest().body(result.getAllErrors());
-        }
-        User savedUser = userService.saveUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
-    }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
